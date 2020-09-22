@@ -80,6 +80,8 @@ NETGO_CHECK = @strings $@ | grep cgo_stub\\\.go >/dev/null || { \
        false; \
 }
 
+LOKI_APP_VERSION=$(shell sed -n -e 's/^appVersion: //p' production/helm/loki/Chart.yaml)
+
 # Protobuf files
 PROTO_DEFS := $(shell find . $(DONT_FIND) -type f -name '*.proto' -print)
 PROTO_GOS := $(patsubst %.proto,%.pb.go,$(PROTO_DEFS))
@@ -413,6 +415,9 @@ fluent-bit-image:
 
 fluent-bit-push:
 	$(SUDO) $(PUSH_OCI) $(IMAGE_PREFIX)/fluent-bit-plugin-loki:$(IMAGE_TAG)
+
+fluent-bit-s3-push:
+	aws s3 cp cmd/fluent-bit/out_loki.so s3://bokun-nvirginia-test-apps/utils/fluent-bit/out_loki.so.$(LOKI_APP_VERSION) --region=us-east-1
 
 fluent-bit-test: LOKI_URL ?= http://localhost:3100/loki/api/
 fluent-bit-test:
