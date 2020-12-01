@@ -426,7 +426,7 @@ fluent-bit-ecr-push:
 	$(SUDO) $(PUSH_OCI) 991828066748.dkr.ecr.us-east-1.amazonaws.com/fluent_bit_loki_service:$(LOKI_APP_VERSION)-$(FLUENT_BIT_VERSION)
 
 fluent-bit-s3-push:
-	aws s3 cp cmd/fluent-bit/out_loki.so s3://bokun-nvirginia-test-apps/utils/fluent-bit/out_loki.so.$(LOKI_APP_VERSION) --region=us-east-1
+	aws s3 cp cmd/fluent-bit/out_loki.so s3://bokun-nvirginia-test-apps/utils/fluent-bit/out_loki.so.$(LOKI_APP_VERSION)-$(FLUENT_BIT_VERSION) --region=us-east-1
 
 fluent-bit-test: LOKI_URL ?= http://localhost:3100/loki/api/
 fluent-bit-test:
