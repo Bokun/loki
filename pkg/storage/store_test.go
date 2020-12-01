@@ -382,6 +382,7 @@ func Test_store_SelectLogs(t *testing.T) {
 				cfg: Config{
 					MaxChunkBatchSize: 10,
 				},
+				chunkMetrics: NilMetrics,
 			}
 
 			ctx = user.InjectOrgID(context.Background(), "test-user")
@@ -591,6 +592,7 @@ func Test_store_SelectSample(t *testing.T) {
 				cfg: Config{
 					MaxChunkBatchSize: 10,
 				},
+				chunkMetrics: NilMetrics,
 			}
 
 			ctx = user.InjectOrgID(context.Background(), "test-user")
@@ -660,6 +662,7 @@ func Test_store_GetSeries(t *testing.T) {
 				cfg: Config{
 					MaxChunkBatchSize: tt.batchSize,
 				},
+				chunkMetrics: NilMetrics,
 			}
 			ctx = user.InjectOrgID(context.Background(), "test-user")
 			out, err := s.GetSeries(ctx, logql.SelectLogParams{QueryRequest: tt.req})
@@ -915,6 +918,11 @@ func TestSchemaConfig_Validate(t *testing.T) {
 		configs []chunk.PeriodConfig
 		err     error
 	}{
+		{
+			name:    "empty",
+			configs: []chunk.PeriodConfig{},
+			err:     zeroLengthConfigError,
+		},
 		{
 			name: "NOT using boltdb-shipper",
 			configs: []chunk.PeriodConfig{{

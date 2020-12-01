@@ -80,6 +80,8 @@ NETGO_CHECK = @strings $@ | grep cgo_stub\\\.go >/dev/null || { \
        false; \
 }
 
+LOKI_APP_VERSION=$(shell sed -n -e 's/^appVersion: //p' production/helm/loki/Chart.yaml)
+
 # Protobuf files
 PROTO_DEFS := $(shell find . $(DONT_FIND) -type f -name '*.proto' -print)
 PROTO_GOS := $(patsubst %.proto,%.pb.go,$(PROTO_DEFS))
@@ -91,6 +93,10 @@ YACC_GOS := $(patsubst %.y,%.y.go,$(YACC_DEFS))
 # Promtail UI files
 PROMTAIL_GENERATED_FILE := pkg/promtail/server/ui/assets_vfsdata.go
 PROMTAIL_UI_FILES := $(shell find ./pkg/promtail/server/ui -type f -name assets_vfsdata.go -prune -o -print)
+
+# Fluent-bit version
+FLUENT_BIT_VERSION=$(shell sed -n -e 's/FROM fluent\/fluent-bit://p' cmd/fluent-bit/Dockerfile)
+
 
 ##########
 # Docker #
@@ -413,6 +419,14 @@ fluent-bit-image:
 
 fluent-bit-push:
 	$(SUDO) $(PUSH_OCI) $(IMAGE_PREFIX)/fluent-bit-plugin-loki:$(IMAGE_TAG)
+
+fluent-bit-ecr-push:
+	$(SUDO) $(TAG_OCI) $(IMAGE_PREFIX)/fluent-bit-plugin-loki:$(IMAGE_TAG) 991828066748.dkr.ecr.us-east-1.amazonaws.com/fluent_bit_loki_service:$(LOKI_APP_VERSION)-$(FLUENT_BIT_VERSION)
+	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 991828066748.dkr.ecr.us-east-1.amazonaws.com
+	$(SUDO) $(PUSH_OCI) 991828066748.dkr.ecr.us-east-1.amazonaws.com/fluent_bit_loki_service:$(LOKI_APP_VERSION)-$(FLUENT_BIT_VERSION)
+
+fluent-bit-s3-push:
+	aws s3 cp cmd/fluent-bit/out_loki.so s3://bokun-nvirginia-test-apps/utils/fluent-bit/out_loki.so.$(LOKI_APP_VERSION)-$(FLUENT_BIT_VERSION) --region=us-east-1
 
 fluent-bit-test: LOKI_URL ?= http://localhost:3100/loki/api/
 fluent-bit-test:
