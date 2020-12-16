@@ -29,3 +29,6 @@ coverage.txt
 
 # emacs
 .#*
+/.idea/
+
+git_commands.txt
