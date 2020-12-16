@@ -429,7 +429,7 @@ docker-driver-clean:
 #####################
 fluent-bit-plugin:
 	echo "whoami:" $(shell whoami)
-	echo "hostname:" $(shell hostname)
+#	echo "hostname:" $(shell hostname)
 	go build $(DYN_GO_BO_FLAGS) -buildmode=c-shared -o cmd/fluent-bit/out_loki.so ./cmd/fluent-bit/
 
 fluent-bit-image: fluent-bit-plugin
