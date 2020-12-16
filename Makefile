@@ -59,10 +59,12 @@ DONT_FIND := -name tools -prune -o -name vendor -prune -o -name .git -prune -o -
 APP_GO_FILES := $(shell find . $(DONT_FIND) -name .y.go -prune -o -name .pb.go -prune -o -name cmd -prune -o -type f -name '*.go' -print)
 
 # Build flags
-VPREFIX := github.com/grafana/loki/pkg/build
+VPREFIX := github.com/Bokun/loki/pkg/build
 GO_LDFLAGS   := -X $(VPREFIX).Branch=$(GIT_BRANCH) -X $(VPREFIX).Version=$(IMAGE_TAG) -X $(VPREFIX).Revision=$(GIT_REVISION) -X $(VPREFIX).BuildUser=$(shell whoami)@$(shell hostname) -X $(VPREFIX).BuildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+GO_BO_LDFLAGS   := -X $(VPREFIX).Branch=$(GIT_BRANCH) -X $(VPREFIX).Version=$(IMAGE_TAG) -X $(VPREFIX).Revision=$(GIT_REVISION) -X $(VPREFIX).BuildUser=$(shell whoami) -X $(VPREFIX).BuildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GO_FLAGS     := -ldflags "-extldflags \"-static\" -s -w $(GO_LDFLAGS)" -tags netgo $(MOD_FLAG)
 DYN_GO_FLAGS := -ldflags "-s -w $(GO_LDFLAGS)" -tags netgo $(MOD_FLAG)
+DYN_GO_BO_FLAGS := -ldflags "-s -w $(GO_BO_LDFLAGS)" -tags netgo $(MOD_FLAG)
 # Per some websites I've seen to add `-gcflags "all=-N -l"`, the gcflags seem poorly if at all documented
 # the best I could dig up is -N disables optimizations and -l disables inlining which should make debugging match source better.
 # Also remove the -s and -w flags present in the normal build which strip the symbol table and the DWARF symbol table.
@@ -426,7 +428,7 @@ docker-driver-clean:
 # fluent-bit plugin #
 #####################
 fluent-bit-plugin:
-	go build $(DYN_GO_FLAGS) -buildmode=c-shared -o cmd/fluent-bit/out_loki.so ./cmd/fluent-bit/
+	go build $(DYN_GO_BO_FLAGS) -buildmode=c-shared -o cmd/fluent-bit/out_loki.so ./cmd/fluent-bit/
 
 fluent-bit-image:
 	$(SUDO) docker build -t $(IMAGE_PREFIX)/fluent-bit-plugin-loki:$(IMAGE_TAG) -f cmd/fluent-bit/Dockerfile .
